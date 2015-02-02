@@ -25,25 +25,33 @@ ErrorStream.prototype._read = function(){
 
 
 function Image(request){
+  console.log(Date.now(), 'new Image', request);
   // placeholder for any error objects
   this.error = null;
 
   // set a mark for the start of the process
   this.mark = Date.now();
 
+  console.log(Date.now(), 'before parseImage');
   // determine the name and format (mime) of the requested image
   this.parseImage(request);
+  console.log(Date.now(), 'done parseImage');
 
+  console.log(Date.now(), 'format', this.format);
   // reject this request if the image format is not correct
   if (_.indexOf(Image.validFormats, this.format) === -1){
     this.error = new Error(Image.formatErrorText);
   }
 
+  console.log(Date.now(), 'before modifiers.parse', request.path);
   // determine the requested modifications
   this.modifiers = modifiers.parse(request.path);
 
+  console.log(Date.now(), 'done modifiers.parse', this.modifiers);
+  console.log(Date.now(), 'before parseUrl');
   // pull the various parts needed from the request params
   this.parseUrl(request);
+  console.log(Date.now(), 'done parseUrl');
 
   // placeholder for the buffer/stream coming from s3, will hold the image
   this.contents = null;
@@ -56,6 +64,7 @@ function Image(request){
 
   // all logging strings will be queued here to be written on response
   this.log = new Logger();
+  console.log(Date.now(), 'done new Image');
 }
 
 
@@ -120,6 +129,7 @@ Image.prototype.isBuffer = function(){
 
 
 Image.prototype.getFile = function(){
+  console.log(Date.now(), 'image.getFile');
   var sources = require('./streams/sources'),
       excludes = env.EXCLUDE_SOURCES ? env.EXCLUDE_SOURCES.split(',') : [],
       streamType = env.DEFAULT_SOURCE,
@@ -132,8 +142,10 @@ Image.prototype.getFile = function(){
     }
   }
 
+  console.log(Date.now(), 'image.getFile steramType', streamType);
   // if this request is for an excluded source create an ErrorStream
   if (excludes.indexOf(streamType) > -1){
+    console.error(Date.now(), 'image.getFile steramType: not supported');
     this.error = new Error(streamType + ' is an excluded source');
     Stream = ErrorStream;
   }
@@ -144,6 +156,7 @@ Image.prototype.getFile = function(){
     Stream = sources[streamType];
   }
 
+  console.log(Date.now(), 'image.getFile new Stream', Stream.name);
   return new Stream(this);
 };
 

@@ -15,6 +15,7 @@ files = require('glob').sync(__dirname + '/*.js');
 for (var i=0; i < files.length; i++){
   var mod = path.basename(files[i], '.js');
   if ( mod !== 'index' ){
+    console.log(Date.now(), 'filters', mod, files[i]);
     modules[mod] = require(files[i]);
   }
 }
@@ -26,6 +27,7 @@ if (fs.existsSync(pluginDir)){
   for (var i=0; i < files.length; i++){
     var mod = path.basename(files[i], '.js');
     if ( mod !== 'index' ){
+      console.log(Date.now(), 'filters plugins', mod, files[i]);
       modules[mod] = require(files[i]);
     }
   }
