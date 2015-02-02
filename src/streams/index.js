@@ -1,17 +1,16 @@
 'use strict';
 
-var path, modules, streams;
-
-path    = require('path');
-modules = require('glob').sync(__dirname + '/*.js');
-streams = {};
+var path    = require('path');
+var modules = require('glob').sync(__dirname + '/*.js');
+var utils   = require('../utils/string');
+var streams = {};
 
 
 for (var i=0; i < modules.length; i++){
   var stream = path.basename(modules[i], '.js');
   if ( stream !== 'index' ){
-    console.log(Date.now(), 'streams', stream, modules[i]);
-    streams[stream] = require(modules[i]);
+    console.log(Date.now(), 'streams', utils.camelCase(stream), modules[i]);
+    streams[utils.camelCase(stream)] = require(modules[i]);
   }
 }
 
