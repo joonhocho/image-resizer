@@ -25,7 +25,7 @@ ErrorStream.prototype._read = function(){
 
 
 function Image(request){
-  console.log(Date.now(), 'new Image', request);
+  console.log(Date.now(), 'new Image', request.url);
   // placeholder for any error objects
   this.error = null;
 
