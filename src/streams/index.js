@@ -10,6 +10,7 @@ streams = {};
 for (var i=0; i < modules.length; i++){
   var stream = path.basename(modules[i], '.js');
   if ( stream !== 'index' ){
+    console.log(Date.now(), 'streams', stream, modules[i]);
     streams[stream] = require(modules[i]);
   }
 }
