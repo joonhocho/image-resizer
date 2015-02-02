@@ -17,6 +17,9 @@ var express = require('express'),
 app.directory = __dirname;
 ir.expressConfig(app);
 
+app.get('/favicon.ico', function () {
+  // do nothing for favicon requests
+});
 
 /**
 Return the modifiers map as a documentation endpoint
@@ -50,13 +53,26 @@ Return an image modified to the requested parameters
 */
 app.get('/*?', function(request, response){
   var image = new Img(request);
+  var stream = image.getFile().pipe(new streams.identify());
 
-  image.getFile()
-    .pipe(new streams.identify())
-    .pipe(new streams.resize())
-    .pipe(new streams.filter())
-    .pipe(new streams.optimize())
-    .pipe(streams.response(request, response));
+  // via query string use the sharp or gm engine
+  if (request.query.hasOwnProperty('sharp')) {
+    image.log.log('engine:', image.log.colors.bold('sharp'));
+    stream = stream.pipe(new streams.resizeSharp());
+  } else {
+    image.log.log('engine:', image.log.colors.bold('gm'));
+    stream = stream.pipe(new streams.resize());
+  }
+
+  stream = stream.pipe(new streams.filter());
+
+  if (request.query.hasOwnProperty('sharp')) {
+    stream = stream.pipe(new streams.optimizeSharp());
+  } else {
+    stream = stream.pipe(new streams.optimize());
+  }
+
+  stream.pipe(streams.response(request, response));
 });
 
 
