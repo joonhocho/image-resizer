@@ -73,7 +73,7 @@ s3Stream.prototype._onGetObject = function (err, data) {
   if (err) {
     // if there is an error store it on the image object and pass it along
     console.error(Date.now(), 's3.getObject', err);
-    this.image.error = new Error(err);
+    this.image.error = err;
   }
   else {
     // if not store the image buffer
