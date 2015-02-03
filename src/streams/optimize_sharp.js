@@ -1,21 +1,18 @@
 'use strict';
 
-var sharp  = require('sharp');
-var env    = require('../config/environment_vars');
-var map    = require('map-stream');
-
+var sharp = require('sharp');
+var env = require('../config/environment_vars');
+var map = require('map-stream');
 
 module.exports = function () {
-
-  return map( function (image, callback) {
-
+  return map(function (image, callback) {
     // pass through if there is an error
     if (image.isError()) {
       return callback(null, image);
     }
 
     // let this pass through if we are requesting the metadata as JSON
-    if (image.modifiers.action === 'json'){
+    if (image.modifiers.action === 'json') {
       image.log.log('optimize: json metadata call');
       return callback(null, image);
     }
@@ -32,7 +29,7 @@ module.exports = function () {
       r.quality(env.IMAGE_QUALITY);
     }
 
-    r.toBuffer( function (err, buffer) {
+    r.toBuffer(function (err, buffer) {
       if (err) {
         image.log.error('optimize error', err);
         image.error = new Error(err);
@@ -45,5 +42,4 @@ module.exports = function () {
       callback(null, image);
     });
   });
-
 };

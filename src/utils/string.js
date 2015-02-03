@@ -1,7 +1,6 @@
 'use strict';
 
-
-exports.sanitize = function(value, type) {
+exports.sanitize = function (value, type) {
   if (typeof type === 'undefined') {
     type = 'number';
   }
@@ -17,10 +16,12 @@ exports.sanitize = function(value, type) {
   }
 };
 
+exports.camelCase = function (input) {
+  return input.toLowerCase().replace(/_(.)/g, function (match, letter) {
+    return letter.toUpperCase();
+  });
+};
 
-exports.camelCase = function(input){
-  return input.toLowerCase()
-    .replace(/_(.)/g, function(match, letter){
-      return letter.toUpperCase();
-    });
+exports.endsWith = function (str, suffix) {
+  return str.indexOf(suffix, str.length - suffix.length) !== -1;
 };

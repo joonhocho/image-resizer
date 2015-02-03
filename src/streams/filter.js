@@ -1,23 +1,19 @@
 'use strict';
 
-var map, filters, _;
+var map = require('map-stream');
+var filters = require('./filters');
 
-map     = require('map-stream');
-filters = require('./filters');
-_       = require('lodash');
+module.exports = function () {
 
-
-module.exports = function(){
-
-  return map(function(image, callback){
+  return map(function (image, callback) {
 
     // pass through if there is an error
-    if (image.isError()){
+    if (image.isError()) {
       return callback(null, image);
     }
 
     // let this pass through if we are requesting the metadata as JSON
-    if (image.modifiers.action === 'json'){
+    if (image.modifiers.action === 'json') {
       image.log.log('filter: json metadata call');
       return callback(null, image);
     }
@@ -25,21 +21,22 @@ module.exports = function(){
     var filter = image.modifiers.filter;
 
     // don't attempt to process a filter if no appropriate modifier is set
-    if (typeof filter === 'undefined'){
-      image.log.log('filter:', image.log.colors.bold('none requested'));
+    if (filter === undefined) {
+      image.log.log('filter:', 'none requested');
       return callback(null, image);
     }
 
-    image.log.time('filter:'+ filter);
+    image.log.time('filter:' + filter);
 
     // run the appropriate filter
-    filters[image.modifiers.filter](image, function(err, data){
-      image.log.timeEnd('filter:'+ filter);
+    filters[filter](image, function (err, data) {
+      image.log.timeEnd('filter:' + filter);
 
       if (err) {
         image.log.error('filter error', err);
         image.error = new Error(err);
-      } else {
+      }
+      else {
         image.contents = data;
       }
 

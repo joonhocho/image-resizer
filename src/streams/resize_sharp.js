@@ -1,32 +1,40 @@
 'use strict';
 
 var sharp = require('sharp');
-var map   = require('map-stream');
-var env   = require('../config/environment_vars');
-var dims  = require('../lib/dimensions');
-
+var map = require('map-stream');
+var env = require('../config/environment_vars');
+var dims = require('../lib/dimensions');
 
 module.exports = function () {
-
-  return map( function(image, callback) {
-
+  return map(function (image, callback) {
     // do nothing if there is an error on the image object
-    if (image.isError()){
+    if (image.isError()) {
       return callback(null, image);
     }
 
     // let this pass through if we are requesting the metadata as JSON
-    if (image.modifiers.action === 'json'){
+    var action = image.modifiers.action;
+    if (action === 'json') {
       image.log.log('resize: json metadata call');
       return callback(null, image);
     }
 
-    if (image.modifiers.action === 'original' && env.RESIZE_PROCESS_ORIGINAL === false){
+    if (action === 'original' && env.RESIZE_PROCESS_ORIGINAL === false) {
       image.log.log('resize: original no resize');
       return callback(null, image);
     }
 
     image.log.time('resize');
+
+    var r = sharp(image.contents);
+
+    if (env.AUTO_ORIENT) {
+      r.rotate();
+    }
+
+    if (!env.REMOVE_METADATA) {
+      r.withMetadata();
+    }
 
     var resizeResponse = function (err, buffer) {
       if (err) {
@@ -41,27 +49,16 @@ module.exports = function () {
       callback(null, image);
     };
 
-    var r = sharp(image.contents);
-
-    if (env.AUTO_ORIENT) {
-      r.rotate();
-    }
-
-    if (!env.REMOVE_METADATA) {
-      r.withMetadata();
-    }
-
     var d, wd, ht;
 
-    switch(image.modifiers.action){
+    switch (action) {
     case 'resize':
       r.resize(image.modifiers.width, image.modifiers.height);
       r.toBuffer(resizeResponse);
       break;
-
     case 'square':
-      r.metadata(function(err, metadata){
-        if (err){
+      r.metadata(function (err, metadata) {
+        if (err) {
           image.error = new Error(err);
           callback(null, image);
           return;
@@ -71,6 +68,34 @@ module.exports = function () {
 
         // resize then crop the image
         r.resize(
+          d.resize.width,
+          d.resize.height
+        ).extract(
+          d.crop.y,
+          d.crop.x,
+          d.crop.width,
+          d.crop.height
+        );
+
+        r.toBuffer(resizeResponse);
+      });
+      break;
+    case 'crop':
+      r.metadata(function (err, size) {
+        if (err) {
+          image.error = new Error(err);
+          callback(null, image);
+          return;
+        }
+
+        switch (image.modifiers.crop) {
+        case 'fit':
+          r.resize(image.modifiers.width, image.modifiers.height);
+          break;
+        case 'fill':
+          d = dims.cropFill(image.modifiers, size);
+
+          r.resize(
             d.resize.width,
             d.resize.height
           ).extract(
@@ -79,36 +104,6 @@ module.exports = function () {
             d.crop.width,
             d.crop.height
           );
-
-        r.toBuffer(resizeResponse);
-      });
-
-      break;
-
-    case 'crop':
-      r.metadata(function(err, size){
-        if (err){
-          image.error = new Error(err);
-          callback(null, image);
-          return;
-        }
-
-        switch(image.modifiers.crop){
-        case 'fit':
-          r.resize(image.modifiers.width, image.modifiers.height);
-          break;
-        case 'fill':
-          d = dims.cropFill(image.modifiers, size);
-
-          r.resize(
-              d.resize.width,
-              d.resize.height
-            ).extract(
-              d.crop.y,
-              d.crop.x,
-              d.crop.width,
-              d.crop.height
-            );
           break;
         case 'cut':
           wd = image.modifiers.width || image.modifiers.height;
@@ -131,10 +126,7 @@ module.exports = function () {
 
         r.toBuffer(resizeResponse);
       });
-
       break;
-
-
     }
   });
 

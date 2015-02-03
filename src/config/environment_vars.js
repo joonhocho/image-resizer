@@ -1,11 +1,6 @@
 'use strict';
 
-var _, vars;
-
-_ = require('lodash');
-
-vars = {
-
+var vars = {
   NODE_ENV: 'development',
   PORT: 3001,
   DEFAULT_SOURCE: 's3',
@@ -53,28 +48,25 @@ vars = {
 
   // Where are the local files kept?
   LOCAL_FILE_PATH: process.cwd()
-
 };
 
-_.forEach(vars, function(value, key){
-  if (_.has(process.env, key)){
+Object.keys(vars).forEach(function (key) {
+  if (process.env.hasOwnProperty(key)) {
     vars[key] = process.env[key];
   }
 
   // cast any boolean strings to proper boolean values
-  if (vars[key] === 'true'){
+  if (vars[key] === 'true') {
     vars[key] = true;
   }
-  if (vars[key] === 'false'){
+  else if (vars[key] === 'false') {
     vars[key] = false;
   }
 });
 
-
 // A few helpers to quickly determine the environment
 vars.development = vars.NODE_ENV === 'development';
-vars.test        = vars.NODE_ENV === 'test';
-vars.production  = vars.NODE_ENV === 'production';
-
+vars.test = vars.NODE_ENV === 'test';
+vars.production = vars.NODE_ENV === 'production';
 
 module.exports = vars;

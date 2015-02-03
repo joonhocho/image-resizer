@@ -44,187 +44,158 @@ Crop modifiers:
 */
 'use strict';
 
+var string = require('../utils/string');
+var sanitize = string.sanitize;
+var endsWith = string.endsWith;
+var env = require('../config/environment_vars');
 
-var _, string, filters, sources, filterKeys, sourceKeys, modifierMap,
-    modKeys, env, fs, namedModifierMap;
+function toKeys(arr) {
+  return arr.reduce(function (obj, key) {
+    obj[key] = 1;
+    return obj;
+  }, {});
+}
 
-_          = require('lodash');
-string     = require('../utils/string');
-filters    = require('../streams/filters');
-sources    = require('../streams/sources');
-filterKeys = _.keys(filters);
-sourceKeys = _.keys(sources);
-env        = require('../config/environment_vars');
-fs         = require('fs');
-
-
-modifierMap = [
-  {
-    key: 'h',
-    desc: 'height',
-    type: 'integer'
-  },
-  {
-    key: 'w',
-    desc: 'width',
-    type: 'integer'
-  },
-  {
-    key: 's',
-    desc: 'square',
-    type: 'integer'
-  },
-  {
-    key: 'y',
-    desc: 'top',
-    type: 'integer'
-  },
-  {
-    key: 'x',
-    desc: 'left',
-    type: 'integer'
-  },
-  {
-    key: 'g',
-    desc: 'gravity',
-    type: 'string',
-    values: ['c','n','s','e','w','ne','nw','se','sw'],
-    default: 'c'
-  },
-  {
-    key: 'c',
-    desc: 'crop',
-    type: 'string',
-    values: ['fit','fill','cut','scale'],
-    default: 'fit'
-  },
-  {
-    key: 'e',
-    desc: 'external',
-    type: 'string',
-    values: sourceKeys,
-    default: env.DEFAULT_SOURCE
-  },
-  {
-    key: 'f',
-    desc: 'filter',
-    type: 'string',
-    values: filterKeys
-  }
-];
+var modifierMap = [{
+  key: 'h',
+  desc: 'height',
+  type: 'integer'
+}, {
+  key: 'w',
+  desc: 'width',
+  type: 'integer'
+}, {
+  key: 's',
+  desc: 'square',
+  type: 'integer'
+}, {
+  key: 'y',
+  desc: 'top',
+  type: 'integer'
+}, {
+  key: 'x',
+  desc: 'left',
+  type: 'integer'
+}, {
+  key: 'g',
+  desc: 'gravity',
+  type: 'string',
+  values: toKeys('c,n,s,e,w,ne,nw,se,sw'.split(',')),
+  'default': 'c'
+}, {
+  key: 'c',
+  desc: 'crop',
+  type: 'string',
+  values: toKeys('fit,fill,cut,scale'.split(',')),
+  'default': 'fit'
+}, {
+  key: 'e',
+  desc: 'external',
+  type: 'string',
+  values: toKeys(Object.keys(require('../streams/sources'))),
+  'default': env.DEFAULT_SOURCE
+}, {
+  key: 'f',
+  desc: 'filter',
+  type: 'string',
+  values: toKeys(Object.keys(require('../streams/filters')))
+}];
 
 exports.map = modifierMap;
 
-modKeys = _.map(modifierMap, function(value){
-  return value.key;
-});
+var modifiersByKey = modifierMap.reduce(function (obj, mod) {
+  obj[mod.key] = mod;
+  return obj;
+}, {});
 
+exports.mod = function (key) {
+  return modifiersByKey[key] || null;
+};
 
-function inArray(key, array){
-  return _.indexOf(array, key) > -1;
-}
-
-function getModifier(key){
-  var i, mod;
-
-  for (i in modifierMap){
-    mod = modifierMap[i];
-    if (mod.key === key){
-      return mod;
-    }
+var namedModifierMap = (function () {
+  // Check to see if there is a config file of named modifier aliases
+  var fs = require('fs');
+  var namedModifiersPath = process.cwd() + '/named_modifiers.json';
+  if (fs.existsSync(namedModifiersPath)) {
+    return JSON.parse(fs.readFileSync(namedModifiersPath));
   }
   return null;
-}
-
-exports.mod = getModifier;
-
-// Check to see if there is a config file of named modifier aliases
-if (fs.existsSync(process.cwd() + '/named_modifiers.json')){
-  var file = fs.readFileSync(process.cwd() + '/named_modifiers.json');
-  namedModifierMap = JSON.parse(file);
-}
-
+})();
 
 // Take an array of modifiers and parse the keys and values into mods hash
 function parseModifiers(mods, modArr) {
-  var key, value, mod;
+  modArr.forEach(function (item) {
+    var key = item[0];
+    var value = item.slice(1);
 
-  _.each(modArr, function(item){
-    key = item[0];
-    value = item.slice(1);
+    // get the modifier object that responds to the listed key
+    var mod = modifiersByKey[key];
+    if (mod) {
 
-    if (inArray(key, modKeys)){
-
-      // get the modifier object that responds to the listed key
-      mod = getModifier(key);
-
-      switch(mod.desc){
+      switch (mod.desc) {
       case 'height':
-        mods.height = string.sanitize(value);
+        mods.height = sanitize(value);
         break;
       case 'width':
-        mods.width = string.sanitize(value);
+        mods.width = sanitize(value);
         break;
       case 'square':
         mods.action = 'square';
-        mods.height = string.sanitize(value);
-        mods.width = string.sanitize(value);
+        mods.height = sanitize(value);
+        mods.width = sanitize(value);
         break;
       case 'gravity':
-        value = string.sanitize(value, 'alpha');
-        if (inArray(value.toLowerCase(), mod.values)){
-          mods.gravity = value.toLowerCase();
+        value = sanitize(value, 'alpha').toLowerCase();
+        if (mod.values[value] === 1) {
+          mods.gravity = value;
         }
         break;
       case 'top':
-        mods.y = string.sanitize(value);
+        mods.y = sanitize(value);
         break;
       case 'left':
-        mods.x = string.sanitize(value);
+        mods.x = sanitize(value);
         break;
       case 'crop':
-        value = string.sanitize(value, 'alpha');
-        if (inArray(value.toLowerCase(), mod.values)){
-          mods.crop = value.toLowerCase();
+        value = sanitize(value, 'alpha').toLowerCase();
+        if (mod.values[value] === 1) {
+          mods.crop = value;
         }
         break;
       case 'external':
-        value = string.sanitize(value, 'alphanumeric');
-        if (inArray(value.toLowerCase(), mod.values)){
-          mods.external = value.toLowerCase();
+        value = sanitize(value, 'alphanumeric').toLowerCase();
+        if (mod.values[value] === 1) {
+          mods.external = value;
         }
         break;
       case 'filter':
-        value = string.sanitize(value, 'alpha');
-        if (inArray(value.toLowerCase(), mod.values)){
-          mods.filter = value.toLowerCase();
+        value = sanitize(value, 'alpha').toLowerCase();
+        if (mod.values[value] === 1) {
+          mods.filter = value;
         }
         break;
       }
-
     }
+
   });
 
   return mods;
 }
 
-
 // Exposed method to parse an incoming URL for modifiers, can add a map of
 // named (preset) modifiers if need be (mostly just for unit testing). Named
 // modifiers are usually added via config json file in root of application.
-exports.parse = function(requestUrl, namedMods){
-  var segments, mods, modStr, image, gravity, crop;
+exports.parse = function (requestUrl, namedMods) {
+  namedMods = namedMods || namedModifierMap;
 
-  gravity   = getModifier('g');
-  crop      = getModifier('c');
-  segments  = requestUrl.replace(/^\//,'').split('/');
-  modStr    = _.first(segments);
-  image     = _.last(segments).toLowerCase();
-  namedMods = typeof namedMods === 'undefined' ? namedModifierMap : namedMods;
-
+  var gravity = modifiersByKey.g;
+  var crop = modifiersByKey.c;
+  var segments = requestUrl.replace(/^\//, '').split('/');
+  var modStr = segments[0];
+  var image = segments[segments.length - 1].toLowerCase();
 
   // set the mod keys and defaults
-  mods = {
+  var mods = {
     action: 'original',
     height: null,
     width: null,
@@ -233,18 +204,19 @@ exports.parse = function(requestUrl, namedMods){
   };
 
   // check the request to see if it includes a named modifier
-  if (namedMods && !_.isEmpty(namedMods)){
-    if (_.has(namedMods, modStr)){
-      _.forEach(namedMods[modStr], function(value, key){
-        if (key === 'square'){
-          mods.action = 'square';
-          mods.height = value;
-          mods.width = value;
-        } else {
-          mods[key] = value;
-        }
-      });
-    }
+  var mod = namedMods && namedMods[modStr];
+  if (mod) {
+    Object.keys(mod).forEach(function (key) {
+      var value = mod[key];
+      if (key === 'square') {
+        mods.action = 'square';
+        mods.height = value;
+        mods.width = value;
+      }
+      else {
+        mods[key] = value;
+      }
+    });
   }
 
   // check the request for available modifiers, unless we are restricting to
@@ -254,27 +226,27 @@ exports.parse = function(requestUrl, namedMods){
   }
 
   // check to see if this a metadata call, it trumps all other requested mods
-  if (image.slice(-5) === '.json'){
+  if (endsWith(image, '.json')) {
     mods.action = 'json';
     return mods;
   }
 
-  if (mods.action === 'square'){
+  if (mods.action === 'square') {
     // make sure crop is set to the default
     mods.crop = 'fill';
     return mods;
   }
 
-  if (mods.height !== null || mods.width !== null){
+  if (mods.height != null || mods.width != null) {
     mods.action = 'resize';
 
-    if (mods.crop !== crop.default){
+    if (mods.crop !== crop.default) {
       mods.action = 'crop';
     }
-    if (mods.gravity !== gravity.default) {
+    else if (mods.gravity !== gravity.default) {
       mods.action = 'crop';
     }
-    if (_.has(mods, 'x') || _.has(mods, 'y')) {
+    else if (mods.x != null || mods.y != null) {
       mods.action = 'crop';
     }
   }

@@ -1,17 +1,13 @@
 'use strict';
 
-var path    = require('path');
-var modules = require('glob').sync(__dirname + '/*.js');
-var utils   = require('../utils/string');
-var streams = {};
+var path = require('path');
+var camelCase = require('../utils/string').camelCase;
 
-
-for (var i=0; i < modules.length; i++){
-  var stream = path.basename(modules[i], '.js');
-  if ( stream !== 'index' ){
-    console.log(Date.now(), 'streams', utils.camelCase(stream), modules[i]);
-    streams[utils.camelCase(stream)] = require(modules[i]);
+module.exports = require('glob').sync(__dirname + '/*.js').reduce(function (streams, module) {
+  var stream = path.basename(module, '.js');
+  if (stream !== 'index') {
+    console.log(Date.now(), 'streams', camelCase(stream), module);
+    streams[camelCase(stream)] = require(module);
   }
-}
-
-module.exports = streams;
+  return streams;
+}, {});

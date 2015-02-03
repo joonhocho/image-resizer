@@ -1,37 +1,29 @@
 'use strict';
 
-var path, fs, cwd, dir, files, modules, pluginDir;
-
-path      = require('path');
-fs        = require('fs');
-cwd       = process.cwd();
-dir       = __dirname.split('/').slice(-1)[0];
-pluginDir = [cwd, 'plugins', dir].join('/');
-modules   = {};
-
+var path = require('path');
+var pathParts = __dirname.split('/');
+var pluginDir = [process.cwd(), 'plugins', pathParts[pathParts.length - 1]].join('/');
+var modules = {};
 
 // get all the files from this directory
-files = require('glob').sync(__dirname + '/*.js');
-for (var i=0; i < files.length; i++){
-  var mod = path.basename(files[i], '.js');
-  if ( mod !== 'index' ){
-    console.log(Date.now(), 'filters', mod, files[i]);
-    modules[mod] = require(files[i]);
+require('glob').sync(__dirname + '/*.js').forEach(function (file) {
+  var mod = path.basename(file, '.js');
+  if (mod !== 'index') {
+    console.log(Date.now(), 'filters', mod, file);
+    modules[mod] = require(file);
   }
-}
+});
 
 // get all the files from the current working directory and override the local
 // ones with any custom plugins
-if (fs.existsSync(pluginDir)){
-  files = require('glob').sync(pluginDir + '/*.js');
-  for (var i=0; i < files.length; i++){
-    var mod = path.basename(files[i], '.js');
-    if ( mod !== 'index' ){
-      console.log(Date.now(), 'filters plugins', mod, files[i]);
-      modules[mod] = require(files[i]);
+if (require('fs').existsSync(pluginDir)) {
+  require('glob').sync(pluginDir + '/*.js').forEach(function (file) {
+    var mod = path.basename(file, '.js');
+    if (mod !== 'index') {
+      console.log(Date.now(), 'filters plugins', mod, file);
+      modules[mod] = require(file);
     }
-  }
+  });
 }
-
 
 module.exports = modules;
