@@ -14,13 +14,15 @@ describe('Modifiers module', function () {
   // Metadata calls
   describe('Metadata request', function () {
     it('should recognise a metadata call', function () {
-      var request = '/elocal/path/to/image.png.json';
+      var request = '/json/path/to/image.png';
       mod.parse(request).action.should.equal('json');
     });
 
-    it('should disregard modifiers in a metadata call', function () {
-      var request = '/s50_gne/path/to/image.png.json';
-      mod.parse(request).action.should.equal('json');
+    it('should be all lowercase json', function () {
+      var request = '/JSON/path/to/image.png';
+      expect(function () {
+        mod.parse(request);
+      }).to.throw(Error, 'Invalid modifier');
     });
   });
 

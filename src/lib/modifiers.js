@@ -227,6 +227,11 @@ exports.parse = function (urlParts, namedMods) {
 
   // check the request to see if it includes a named modifier
   var modStr = urlParts[0];
+  if (modStr === 'json') {
+    mods.action = 'json';
+    return mods;
+  }
+
   var mod = namedMods && namedMods[modStr];
   if (mod) {
     Object.keys(mod).forEach(function (key) {
@@ -248,13 +253,6 @@ exports.parse = function (urlParts, namedMods) {
   }
   else {
     throw new Error('Invalid modifier');
-  }
-
-  // check to see if this a metadata call, it trumps all other requested mods
-  var image = urlParts[urlParts.length - 1];
-  if (endsWith(image, '.json')) {
-    mods.action = 'json';
-    return mods;
   }
 
   if (mods.action === 'square') {
