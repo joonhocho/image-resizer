@@ -85,10 +85,6 @@ Image.prototype.validateFormat = function () {
 // Determine the name and format of the requested image
 Image.prototype.parseImage = function () {
   var fileStr = this.urlParts[this.urlParts.length - 1];
-
-  // clean out any metadata format
-  fileStr = fileStr.replace(/.json$/, '');
-
   this.image = fileStr;
 
   var parts = fileStr.split('.');
@@ -97,21 +93,8 @@ Image.prototype.parseImage = function () {
 
 // Determine the file path for the requested image
 Image.prototype.parseUrl = function () {
-  var parts = this.urlParts.slice();
-
-  // overwrite the image name with the parsed version so metadata requests do
-  // not mess things up
-  parts[parts.length - 1] = this.image;
-
-  // if the request is for no modification or metadata then assume the s3path
-  // is the entire request path
-  if (this.modifiers.external ||
-    !(this.modifiers.action === 'original' || this.modifiers.action === 'json')) {
-    parts.shift();
-  }
-
   // account for any spaces in the path
-  this.path = decodeURI(parts.join('/'));
+  this.path = decodeURI(this.urlParts.slice(1).join('/'));
 };
 
 Image.prototype.isError = function () {

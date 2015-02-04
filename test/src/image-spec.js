@@ -21,7 +21,7 @@ describe('Image class', function () {
     });
 
     it('should still get format from a metadata request', function () {
-      var img = new Img('/elocal/path/to/image.jpg.json');
+      var img = new Img('/json/path/to/image.jpg');
       img.format.should.equal('jpg');
     });
 
@@ -36,7 +36,7 @@ describe('Image class', function () {
     });
 
     it('should retrieve image name from path even for metadata', function () {
-      var img = new Img('/elocal/path/to/image.jpg.json');
+      var img = new Img('/json/path/to/image.jpg');
       img.image.should.equal('image.jpg');
     });
 
@@ -48,7 +48,7 @@ describe('Image class', function () {
 
     it('should handle metadata for image names with dashes', function () {
       var dashed = '8b0ccce0-0a6c-4270-9bc0-8b6dfaabea19.jpg',
-        img = new Img('/elocal/path/to/' + dashed + '.json');
+        img = new Img('/json/path/to/' + dashed);
       img.image.should.equal(dashed);
     });
 
@@ -66,7 +66,7 @@ describe('Image class', function () {
 
     it('should handle metadata for image names with periods', function () {
       var perioded = '8b0ccce0.0a6c.4270.9bc0.8b6dfaabea19.jpg',
-        img = new Img('/elocal/path/to/' + perioded + '.json');
+        img = new Img('/json/path/to/' + perioded);
       img.image.should.equal(perioded);
     });
 
@@ -74,7 +74,11 @@ describe('Image class', function () {
 
   describe('#parseUrl()', function () {
     it('should return a clean path', function () {
-      var img = new Img('/elocal/path/to/image.jpg.json');
+      var img = new Img('/json/path/to/image.jpg');
+      img.path.should.equal('path/to/image.jpg');
+    });
+    it('should return a clean path', function () {
+      var img = new Img('/original/path/to/image.jpg');
       img.path.should.equal('path/to/image.jpg');
     });
     it('should return path even with modifiers', function () {

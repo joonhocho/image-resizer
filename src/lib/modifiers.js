@@ -8,7 +8,7 @@ Sample modifier strings, separated by a dash
   - /w300-h200/path/to/image.png
   - /image.jpg
   - /path/to/image.png
-  - /path/to/image.png.json
+  - /json/path/to/image.png
 
 
 Supported modifiers are:
@@ -227,8 +227,8 @@ exports.parse = function (urlParts, namedMods) {
 
   // check the request to see if it includes a named modifier
   var modStr = urlParts[0];
-  if (modStr === 'json') {
-    mods.action = 'json';
+  if (modStr === 'json' || modStr === 'original') {
+    mods.action = modStr;
     return mods;
   }
 
@@ -258,10 +258,8 @@ exports.parse = function (urlParts, namedMods) {
   if (mods.action === 'square') {
     // make sure crop is set to the default
     mods.crop = 'fill';
-    return mods;
   }
-
-  if (mods.height != null || mods.width != null) {
+  else if (mods.height != null || mods.width != null) {
     if (mods.crop !== crop.default || mods.gravity !== gravity.default || mods.x != null || mods.y != null) {
       mods.action = 'crop';
     }

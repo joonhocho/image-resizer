@@ -214,7 +214,7 @@ It is also trivial to write new source streams via the plugins directory. Exampl
 
 `image-resizer` can return the image metadata as a json endpoint:
 
-* `http://my.cdn.com/path/to/image.png.json`
+* `http://my.cdn.com/json/path/to/image.png`
 
 Metadata is removed in all other image requests by default, unless the env var `REMOVE_METADATA` is set to `false`.
 

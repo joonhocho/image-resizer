@@ -11,6 +11,20 @@ chai.should();
 
 describe('Modifiers module', function () {
 
+  describe('Original request', function () {
+    it('should recognise original', function () {
+      var request = '/original/path/to/image.png';
+      mod.parse(request).action.should.equal('original');
+    });
+
+    it('should be all lowercase original', function () {
+      var request = '/ORIGINAL/path/to/image.png';
+      expect(function () {
+        mod.parse(request);
+      }).to.throw(Error, 'Invalid modifier');
+    });
+  });
+
   // Metadata calls
   describe('Metadata request', function () {
     it('should recognise a metadata call', function () {
