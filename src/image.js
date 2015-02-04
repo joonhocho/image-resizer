@@ -33,26 +33,29 @@ ErrorStream.prototype._read = function () {
   this.push(null);
 };
 
-function Image(request) {
-  console.log(Date.now(), 'new Image', request.url);
+function Image(url) {
+  console.log(Date.now(), 'new Image', url);
   this.error = null;
   this.mark = Date.now();
 
+  this.url = url;
+  this.urlParts = url.replace(/^\//, '').split('/');
+
   console.log(Date.now(), 'before parseImage');
   // determine the name and format (mime) of the requested image
-  this.parseImage(request);
+  this.parseImage();
   console.log(Date.now(), 'done parseImage');
 
   this.validateFormat();
 
-  console.log(Date.now(), 'before modifiers.parse', request.path);
+  console.log(Date.now(), 'before modifiers.parse', url);
   // determine the requested modifications
-  this.modifiers = modifiers.parse(request.path);
+  this.modifiers = modifiers.parse(url);
 
   console.log(Date.now(), 'done modifiers.parse', this.modifiers);
   console.log(Date.now(), 'before parseUrl');
   // pull the various parts needed from the request params
-  this.parseUrl(request);
+  this.parseUrl();
   console.log(Date.now(), 'done parseUrl');
 
   // placeholder for the buffer/stream coming from s3, will hold the image
@@ -75,14 +78,13 @@ Image.prototype.validateFormat = function () {
   console.log(Date.now(), 'format', this.format);
   // reject this request if the image format is not correct
   if (ALLOWED_EXTENSIONS[this.format] !== 1) {
-    this.error = new Error(Image.formatErrorText);
+    throw new Error(Image.formatErrorText);
   }
 };
 
 // Determine the name and format of the requested image
-Image.prototype.parseImage = function (request) {
-  var paths = request.path.split('/');
-  var fileStr = paths[paths.length - 1];
+Image.prototype.parseImage = function () {
+  var fileStr = this.urlParts[this.urlParts.length - 1];
 
   // clean out any metadata format
   fileStr = fileStr.replace(/.json$/, '');
@@ -90,12 +92,12 @@ Image.prototype.parseImage = function (request) {
   this.image = fileStr;
 
   var parts = fileStr.split('.');
-  this.format = parts[parts.length - 1].toLowerCase();
+  this.format = parts[parts.length - 1];
 };
 
 // Determine the file path for the requested image
-Image.prototype.parseUrl = function (request) {
-  var parts = request.path.replace(/^\//, '').split('/');
+Image.prototype.parseUrl = function () {
+  var parts = this.urlParts.slice();
 
   // overwrite the image name with the parsed version so metadata requests do
   // not mess things up
@@ -103,7 +105,8 @@ Image.prototype.parseUrl = function (request) {
 
   // if the request is for no modification or metadata then assume the s3path
   // is the entire request path
-  if (this.modifiers.external || !/^original|json$/i.test(this.modifiers.action)) {
+  if (this.modifiers.external ||
+    !(this.modifiers.action === 'original' || this.modifiers.action === 'json')) {
     parts.shift();
   }
 

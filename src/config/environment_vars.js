@@ -8,6 +8,7 @@ var vars = {
 
   // Restrict to named modifiers strings only
   NAMED_MODIFIERS_ONLY: false,
+  MOD_SEPARATOR: '_',
 
   // AWS keys
   AWS_ACCESS_KEY_ID: null,

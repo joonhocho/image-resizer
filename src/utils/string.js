@@ -1,19 +1,22 @@
 'use strict';
 
-exports.sanitize = function (value, type) {
-  if (typeof type === 'undefined') {
-    type = 'number';
+var INT_REGEXP = /^-?[1-9][0-9]*$/;
+var UINT_REGEXP = /^[1-9][0-9]*$/;
+
+exports.toInt = function (str) {
+  if (INT_REGEXP.test(str)) {
+    var val = parseInt(str, 10);
+    return isFinite(val) ? val : null;
   }
-  switch (type) {
-  case 'number':
-    return value.toString().replace(/[^0-9]/, '') * 1;
-  case 'alphanumeric':
-    return value.replace(/[^a-z0-9]/i, '');
-  case 'alpha':
-    return value.replace(/[^a-z]/i, '');
-  default:
-    return value.replace(/[^0-9]/, '');
+  return null;
+};
+
+exports.toUInt = function (str) {
+  if (UINT_REGEXP.test(str)) {
+    var val = parseInt(str, 10);
+    return isFinite(val) ? val : null;
   }
+  return null;
 };
 
 exports.camelCase = function (input) {

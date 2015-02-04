@@ -15,7 +15,7 @@ function Local(image){
   }
   stream.Readable.call(this, { objectMode : true });
   this.image = image;
-  this.path = image.path.replace(/^elocal/i,'');
+  this.path = image.path.replace(/^elocal/,'');
   this.filePath = env.LOCAL_FILE_PATH + '/' + this.path;
   this.ended = false;
 }
