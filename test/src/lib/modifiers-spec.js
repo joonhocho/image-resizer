@@ -13,14 +13,12 @@ describe('Modifiers module', function () {
 
   describe('Original request', function () {
     it('should recognise original', function () {
-      var request = '/original/path/to/image.png';
-      mod.parse(request).action.should.equal('original');
+      mod.parse('original').action.should.equal('original');
     });
 
     it('should be all lowercase original', function () {
-      var request = '/ORIGINAL/path/to/image.png';
       expect(function () {
-        mod.parse(request);
+        mod.parse('ORIGINAL');
       }).to.throw(Error, 'Invalid modifier');
     });
   });
@@ -28,14 +26,12 @@ describe('Modifiers module', function () {
   // Metadata calls
   describe('Metadata request', function () {
     it('should recognise a metadata call', function () {
-      var request = '/json/path/to/image.png';
-      mod.parse(request).action.should.equal('json');
+      mod.parse('json').action.should.equal('json');
     });
 
     it('should be all lowercase json', function () {
-      var request = '/JSON/path/to/image.png';
       expect(function () {
-        mod.parse(request);
+        mod.parse('JSON');
       }).to.throw(Error, 'Invalid modifier');
     });
   });
@@ -43,78 +39,65 @@ describe('Modifiers module', function () {
   // Original image
   describe('No modifiers', function () {
     it('should recognise no modifiers and return original action', function () {
-      var request = '/elocal/path/to/image.png';
-      mod.parse(request).action.should.equal('original');
+      mod.parse('elocal').action.should.equal('original');
     });
 
     it('should not return original if there are valid modifiers', function () {
-      var request = '/h500/path/to/image.jpg';
-      mod.parse(request).action.should.not.equal('original');
-      request = '/h500_gne/path/to/image.jpg';
-      mod.parse(request).action.should.not.equal('original');
+      mod.parse('h500').action.should.not.equal('original');
+      mod.parse('h500_gne').action.should.not.equal('original');
     });
   });
 
   // Gravity
   describe('Gravity', function () {
     it('should read gravity as a modifier string', function () {
-      var request = '/s50_gne/path/to/image.jpg';
-      mod.parse(request).gravity.should.equal('ne');
+      mod.parse('s50_gne').gravity.should.equal('ne');
     });
 
     it('gravity should be case sensitive', function () {
-      var request = '/s50_gNE/path/to/image.jpg';
       expect(function () {
-        mod.parse(request);
+        mod.parse('s50_gNE');
       }).to.throw(Error, 'Invalid gravity');
     });
 
     it('should not accept a non-valid gravity value', function () {
-      var request = '/s50_gnorth/path/to/image.jpg';
       expect(function () {
-        mod.parse(request);
+        mod.parse('s50_gnorth');
       }).to.throw(Error, 'Invalid gravity');
     });
 
     it('should set the action to square', function () {
-      var request = '/s50_gne/path/to/image.jpg';
-      mod.parse(request).action.should.equal('square');
+      mod.parse('s50_gne').action.should.equal('square');
     });
 
     it('should set the action to crop', function () {
-      var request = '/h400_w600_gse/path/to/image.jpg';
-      mod.parse(request).action.should.equal('crop');
+      mod.parse('h400_w600_gse').action.should.equal('crop');
     });
   });
 
   // Square
   describe('Square', function () {
     it('should set action to square', function () {
-      var request = '/s500/path/to/image.jpg';
-      mod.parse(request).action.should.equal('square');
+      mod.parse('s500').action.should.equal('square');
     });
 
     it('should set the height and width correctly', function () {
-      var request = '/s500/path/to/image.jpg';
-      mod.parse(request).height.should.equal(500);
-      mod.parse(request).width.should.equal(500);
+      mod.parse('s500').height.should.equal(500);
+      mod.parse('s500').width.should.equal(500);
     });
 
     it('should not allow a crop value other than the fill', function () {
-      var request = '/s500_gne_cfill/image.jpg';
-      mod.parse(request).crop.should.equal('fill');
+      mod.parse('s500_gne_cfill').crop.should.equal('fill');
     });
   });
 
   // Height
   describe('Height requests', function () {
     it('should set the action to resize', function () {
-      var request = '/h400/path/to/image.png';
-      mod.parse(request).action.should.equal('resize');
+      mod.parse('h400').action.should.equal('resize');
     });
     it('should set the height and leave the width as null', function () {
-      var request = '/h400/image.png',
-        p = mod.parse(request);
+      var p = mod.parse('h400');
       expect(p.height).to.equal(400);
       expect(p.width).to.be.null;
     });
@@ -123,12 +106,10 @@ describe('Modifiers module', function () {
   // Width
   describe('Width requests', function () {
     it('should set the action to resize', function () {
-      var request = '/w400/path/to/image.png';
-      mod.parse(request).action.should.equal('resize');
+      mod.parse('w400').action.should.equal('resize');
     });
     it('should set the width and leave the height as null', function () {
-      var request = '/w400/image.png',
-        p = mod.parse(request);
+      var p = mod.parse('w400');
       expect(p.width).to.equal(400);
       expect(p.height).to.be.null;
     });
@@ -154,20 +135,16 @@ describe('Modifiers module', function () {
     };
 
     it('should read a thumbnail named config and set accordingly', function () {
-      var request = '/thumb/path/to/image.png',
-        tn = nm.thumb;
-
-      mod.parse(request, nm).gravity.should.equal(tn.gravity);
-      mod.parse(request, nm).height.should.equal(tn.square);
-      mod.parse(request, nm).width.should.equal(tn.square);
+      var tn = nm.thumb;
+      mod.parse('thumb', nm).gravity.should.equal(tn.gravity);
+      mod.parse('thumb', nm).height.should.equal(tn.square);
+      mod.parse('thumb', nm).width.should.equal(tn.square);
     });
 
     it('should read a gallery named config and set accordingly', function () {
-      var request = '/gallery/path/to/image.png',
-        tn = nm.gallery;
-
-      mod.parse(request, nm).height.should.equal(tn.height);
-      mod.parse(request, nm).width.should.equal(tn.width);
+      var tn = nm.gallery;
+      mod.parse('gallery', nm).height.should.equal(tn.height);
+      mod.parse('gallery', nm).width.should.equal(tn.width);
     });
 
   });

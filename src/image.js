@@ -50,7 +50,7 @@ function Image(url) {
 
   console.log(Date.now(), 'before modifiers.parse', url);
   // determine the requested modifications
-  this.modifiers = modifiers.parse(url);
+  this.modifiers = modifiers.parse(this.urlParts[0]);
 
   console.log(Date.now(), 'done modifiers.parse', this.modifiers);
   console.log(Date.now(), 'before parseUrl');

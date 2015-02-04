@@ -47,7 +47,6 @@ Crop modifiers:
 var string = require('../utils/string');
 var toInt = string.toInt;
 var toUInt = string.toUInt;
-var endsWith = string.endsWith;
 var env = require('../config/environment_vars');
 var MOD_SEPARATOR = env.MOD_SEPARATOR || '_';
 
@@ -207,10 +206,7 @@ function parseModifiers(mods, modArr) {
 // Exposed method to parse an incoming URL for modifiers, can add a map of
 // named (preset) modifiers if need be (mostly just for unit testing). Named
 // modifiers are usually added via config json file in root of application.
-exports.parse = function (urlParts, namedMods) {
-  if (typeof urlParts === 'string') {
-    urlParts = urlParts.replace(/^\//, '').split('/');
-  }
+exports.parse = function (modStr, namedMods) {
   namedMods = namedMods || namedModifierMap;
 
   var gravity = modifiersByKey.g;
@@ -226,7 +222,6 @@ exports.parse = function (urlParts, namedMods) {
   };
 
   // check the request to see if it includes a named modifier
-  var modStr = urlParts[0];
   if (modStr === 'json' || modStr === 'original') {
     mods.action = modStr;
     return mods;
