@@ -33,7 +33,7 @@ ErrorStream.prototype._read = function () {
   this.push(null);
 };
 
-function Image(url) {
+function Image(url, noParseModifier) {
   console.log(Date.now(), 'new Image', url);
   this.error = null;
   this.mark = Date.now();
@@ -50,7 +50,7 @@ function Image(url) {
 
   console.log(Date.now(), 'before modifiers.parse', url);
   // determine the requested modifications
-  this.modifiers = modifiers.parse(this.urlParts[0]);
+  this.modifiers = noParseModifier ? {} : modifiers.parse(this.urlParts[0]);
 
   console.log(Date.now(), 'done modifiers.parse', this.modifiers);
   console.log(Date.now(), 'before parseUrl');
