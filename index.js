@@ -4,7 +4,9 @@ var env = require('./src/config/environment_vars');
 
 module.exports = {
 
-  img: require('./src/image'),
+  Image: require('./src/image'),
+  Director: require('./src/director'),
+
   streams: require('./src/streams'),
   sources: require('./src/streams/sources'),
   filter: require('./src/streams/filter'),

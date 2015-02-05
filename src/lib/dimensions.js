@@ -137,3 +137,42 @@ exports.cropFill = function (modifiers, size) {
     }
   };
 };
+
+exports.crop = function (width, height, newWidth, newHeight, x, y) {
+  return {
+    x: x * (width - newWidth),
+    y: y * (height - newHeight)
+  };
+};
+
+exports.scaleToFit = function (width, height, newWidth, newHeight) {
+  // Keep aspect ratio
+  // http://stackoverflow.com/a/1373879/692528
+  var scale = Math.min(newWidth / width, newHeight / height);
+
+  var destWidth = scale * width;
+  var destHeight = scale * height;
+
+  return {
+    x: (newWidth - destWidth) / 2,
+    y: (newHeight - destHeight) / 2,
+    width: destWidth,
+    height: destHeight
+  };
+};
+
+exports.scaleToFill = function (width, height, newWidth, newHeight) {
+  // Keep aspect ratio
+  // http://stackoverflow.com/a/617631/692528
+  var scale = Math.max(newWidth / width, newHeight / height);
+
+  var destWidth = scale * width;
+  var destHeight = scale * height;
+
+  return {
+    x: (newWidth - destWidth) / 2,
+    y: (newHeight - destHeight) / 2,
+    width: destWidth,
+    height: destHeight
+  };
+};
