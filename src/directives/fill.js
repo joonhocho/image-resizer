@@ -12,10 +12,10 @@ exports.parse = function (w, h, x, y) {
   h = string.toUIntOrThrow(h);
   string.assertRange(h, 0, 2048);
 
-  x = string.toUFloatOrThrow(x);
+  x = x ? string.toUFloatOrThrow(x) : 0.5;
   string.assertRange(x, 0, 1);
 
-  y = string.toUFloatOrThrow(y);
+  y = y ? string.toUFloatOrThrow(y) : 0.5;
   string.assertRange(y, 0, 1);
 
   return {
