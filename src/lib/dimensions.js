@@ -154,8 +154,8 @@ exports.scaleToFit = function (width, height, newWidth, newHeight) {
   var destHeight = scale * height;
 
   return {
-    x: (newWidth - destWidth) / 2,
-    y: (newHeight - destHeight) / 2,
+    x: newWidth - destWidth,
+    y: newHeight - destHeight,
     width: destWidth,
     height: destHeight
   };
@@ -170,8 +170,8 @@ exports.scaleToFill = function (width, height, newWidth, newHeight) {
   var destHeight = scale * height;
 
   return {
-    x: (newWidth - destWidth) / 2,
-    y: (newHeight - destHeight) / 2,
+    x: newWidth - destWidth,
+    y: newHeight - destHeight,
     width: destWidth,
     height: destHeight
   };

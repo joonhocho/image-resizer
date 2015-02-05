@@ -45,7 +45,7 @@ exports.stream = function (options) {
 
       sharp
         .resize(dim.width, dim.height)
-        .extract(dim.y, dim.x, options.width, options.height)
+        .extract(-options.y * dim.y, -options.x * dim.x, options.width, options.height)
         .toBuffer(function (err, buffer) {
           if (err) {
             image.log.error('resize error', err);

@@ -6,7 +6,7 @@ function Director(options) {
   options = options || {};
   this.directiveSeparator = options.directiveSeparator || ';';
   this.paramSeparator = options.paramSeparator || ',';
-  this.regexp = options.regexp || /^(\w+)(?:\=(\w+(?:,\w+)*))?$/;
+  this.regexp = options.regexp || /^(\w+)(?:\=([\w.]+(?:,[\w.]+)*))?$/;
   this.map = {};
 }
 
@@ -19,7 +19,7 @@ Director.prototype = {
     };
   },
   parse: function (str) {
-    return str.split(this.directiveSeparator).map(this.parseOne);
+    return str.split(this.directiveSeparator).map(this.parseOne, this);
   },
   parseOne: function (str) {
     if (!str) {
