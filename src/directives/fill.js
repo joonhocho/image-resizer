@@ -32,30 +32,38 @@ exports.stream = function (options) {
       return callback(null, image);
     }
 
-    image.log.time('fill');
+    image.log.time('metadata');
 
     var sharp = new Sharp(image.contents).metadata(function (err, size) {
+      image.log.timeEnd('metadata');
+
       if (err) {
         image.error = err;
         callback(null, image);
         return;
       }
 
+      image.log.time('fill');
+
       var dim = dims.scaleToFill(size.width, size.height, options.width, options.height);
 
       sharp
+        .sequentialRead()
+        .withoutEnlargement()
+        .rotate()
         .resize(dim.width, dim.height)
         .extract(-options.y * dim.y, -options.x * dim.x, options.width, options.height)
         .toBuffer(function (err, buffer) {
+          image.log.timeEnd('fill');
+
           if (err) {
-            image.log.error('resize error', err);
+            image.log.error('fill error', err);
             image.error = new Error(err);
           }
           else {
             image.contents = buffer;
           }
 
-          image.log.timeEnd('resize');
           callback(null, image);
         });
     });
