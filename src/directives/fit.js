@@ -40,7 +40,7 @@ exports.stream = function (options) {
 
         if (err) {
           image.log.error('fit error', err);
-          image.error = new Error(err);
+          image.error = err;
         }
         else {
           image.contents = buffer;

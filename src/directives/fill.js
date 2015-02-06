@@ -66,7 +66,7 @@ exports.stream = function (options) {
 
           if (err) {
             image.log.error('fill error', err);
-            image.error = new Error(err);
+            image.error = err;
           }
           else {
             image.contents = buffer;
