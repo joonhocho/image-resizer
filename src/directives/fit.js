@@ -4,22 +4,18 @@ var Sharp = require('sharp');
 var map = require('map-stream');
 var string = require('../utils/string');
 
-exports.parse = function (w, h, x, y) {
+exports.parse = function (w, h) {
+  if (arguments.length !== 2) {
+    throw new Error('Invalid fit arguments');
+  }
+
   w = string.toUIntOrThrow(w);
   string.assertRange(w, 0, 2048);
 
   h = string.toUIntOrThrow(h);
   string.assertRange(h, 0, 2048);
 
-  x = x ? string.toUFloatOrThrow(x) : 0.5;
-  string.assertRange(x, 0, 1);
-
-  y = y ? string.toUFloatOrThrow(y) : 0.5;
-  string.assertRange(y, 0, 1);
-
   return {
-    x: x,
-    y: y,
     width: w,
     height: h
   };

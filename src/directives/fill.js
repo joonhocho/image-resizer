@@ -6,6 +6,10 @@ var dims = require('../lib/dimensions');
 var string = require('../utils/string');
 
 exports.parse = function (w, h, x, y) {
+  if (arguments.length !== 2 && arguments.length !== 4) {
+    throw new Error('Invalid fill arguments');
+  }
+
   w = string.toUIntOrThrow(w);
   string.assertRange(w, 0, 2048);
 
