@@ -21,10 +21,10 @@ exports.parse = function (w, h, x, y) {
   }
 
   w = string.toUIntOrThrow(w);
-  string.assertRange(w, 0, 2048);
+  string.assertRange(w, 1, 2048);
 
   h = string.toUIntOrThrow(h);
-  string.assertRange(h, 0, 2048);
+  string.assertRange(h, 1, 2048);
 
   return {
     x: x,

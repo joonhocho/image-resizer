@@ -10,7 +10,7 @@ exports.parse = function (w) {
   }
 
   w = string.toUIntOrThrow(w);
-  string.assertRange(w, 0, 2048);
+  string.assertRange(w, 1, 2048);
 
   return w;
 };
@@ -27,7 +27,7 @@ exports.stream = function (width) {
     new Sharp(image.contents)
       .withoutEnlargement()
       .rotate()
-      .resize(width)
+      .resize(width, null)
       .toBuffer(function (err, buffer) {
         image.log.timeEnd('width');
 

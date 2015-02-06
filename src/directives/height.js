@@ -10,7 +10,7 @@ exports.parse = function (h) {
   }
 
   h = string.toUIntOrThrow(h);
-  string.assertRange(h, 0, 2048);
+  string.assertRange(h, 1, 2048);
 
   return h;
 };
