@@ -4,42 +4,35 @@ var Sharp = require('sharp');
 var map = require('map-stream');
 var string = require('../utils/string');
 
-exports.parse = function (w, h) {
-  if (arguments.length !== 2) {
-    throw new Error('Invalid fit arguments');
+exports.parse = function (w) {
+  if (arguments.length !== 1) {
+    throw new Error('Invalid width arguments');
   }
 
   w = string.toUIntOrThrow(w);
   string.assertRange(w, 0, 2048);
 
-  h = string.toUIntOrThrow(h);
-  string.assertRange(h, 0, 2048);
-
-  return {
-    width: w,
-    height: h
-  };
+  return w;
 };
 
-exports.stream = function (options) {
+exports.stream = function (width) {
   return map(function (image, callback) {
     if (image.isError()) {
       return callback(null, image);
     }
 
-    image.log.time('fit');
+    image.log.time('width');
 
     // .sequentialRead() causes out of order read errors
     new Sharp(image.contents)
       .withoutEnlargement()
       .rotate()
-      .resize(options.width, options.height)
-      .max()
+      .resize(width)
       .toBuffer(function (err, buffer) {
-        image.log.timeEnd('fit');
+        image.log.timeEnd('width');
 
         if (err) {
-          image.log.error('fit error', err);
+          image.log.error('width error', err);
           image.error = err;
         }
         else {

@@ -55,8 +55,8 @@ exports.stream = function (options) {
 
       var dim = dims.scaleToFill(size.width, size.height, options.width, options.height);
 
+      // .sequentialRead() causes out of order read errors
       sharp
-        .sequentialRead()
         .withoutEnlargement()
         .rotate()
         .resize(dim.width, dim.height)
