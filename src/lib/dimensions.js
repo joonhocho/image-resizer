@@ -140,39 +140,62 @@ exports.cropFill = function (modifiers, size) {
 
 exports.crop = function (width, height, newWidth, newHeight, x, y) {
   return {
-    x: x * (width - newWidth),
-    y: y * (height - newHeight)
+    x: Math.round(x * (width - newWidth)),
+    y: Math.round(y * (height - newHeight))
   };
 };
 
-exports.scaleToFit = function (width, height, newWidth, newHeight) {
+exports.scaleToFit = function (width, height, newWidth, newHeight, allowEnlarge) {
   // Keep aspect ratio
   // http://stackoverflow.com/a/1373879/692528
   var scale = Math.min(newWidth / width, newHeight / height);
 
-  var destWidth = scale * width;
-  var destHeight = scale * height;
-
-  return {
-    x: newWidth - destWidth,
-    y: newHeight - destHeight,
-    width: destWidth,
-    height: destHeight
-  };
+  return exports.scaleAndCrop(width, height, scale, newWidth, newHeight, allowEnlarge);
 };
 
-exports.scaleToFill = function (width, height, newWidth, newHeight) {
+exports.scaleToFill = function (width, height, newWidth, newHeight, allowEnlarge) {
   // Keep aspect ratio
   // http://stackoverflow.com/a/617631/692528
   var scale = Math.max(newWidth / width, newHeight / height);
 
-  var destWidth = scale * width;
-  var destHeight = scale * height;
+  return exports.scaleAndCrop(width, height, scale, newWidth, newHeight, allowEnlarge);
+};
+
+exports.scaleAndCrop = function (width, height, scale, newWidth, newHeight, allowEnlarge) {
+  var destWidth, destHeight;
+  if (!allowEnlarge && scale > 1) {
+    newWidth = Math.round(newWidth / scale);
+    newHeight = Math.round(newHeight / scale);
+    destWidth = width;
+    destHeight = height;
+  }
+  else {
+    destWidth = Math.round(scale * width);
+    destHeight = Math.round(scale * height);
+  }
 
   return {
-    x: newWidth - destWidth,
-    y: newHeight - destHeight,
     width: destWidth,
-    height: destHeight
+    height: destHeight,
+    maxCropX: destWidth - newWidth,
+    maxCropY: destHeight - newHeight,
+    cropWidth: newWidth,
+    cropHeight: newHeight
+  };
+};
+
+exports.orientedSize = function (size) {
+  var width, height;
+  if (size.orientation >= 5) {
+    width = size.height;
+    height = size.width;
+  }
+  else {
+    width = size.width;
+    height = size.height;
+  }
+  return {
+    width: width,
+    height: height
   };
 };

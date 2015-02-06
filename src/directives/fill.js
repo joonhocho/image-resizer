@@ -53,6 +53,8 @@ exports.stream = function (options) {
 
       image.log.time('fill');
 
+      size = dims.orientedSize(size);
+
       var dim = dims.scaleToFill(size.width, size.height, options.width, options.height);
 
       // .sequentialRead() causes out of order read errors
@@ -60,7 +62,7 @@ exports.stream = function (options) {
         .withoutEnlargement()
         .rotate()
         .resize(dim.width, dim.height)
-        .extract(-options.y * dim.y, -options.x * dim.x, options.width, options.height)
+        .extract(options.y * dim.maxCropY, options.x * dim.maxCropX, dim.cropWidth, dim.cropHeight)
         .toBuffer(function (err, buffer) {
           image.log.timeEnd('fill');
 
